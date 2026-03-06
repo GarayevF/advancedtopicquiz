@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTA 98-365 | Windows Server Administration Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f6f8;--bg-white:#ffffff;--bg-hover:#f0f1f4;
+  --blue:#3b82f6;--blue-light:#eff6ff;--blue-dark:#1e40af;
+  --green:#16a34a;--green-light:#f0fdf4;--green-border:#bbf7d0;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fecaca;
+  --amber:#d97706;--amber-light:#fffbeb;
+  --text:#1e293b;--text-secondary:#64748b;--text-dim:#94a3b8;
+  --border:#e2e8f0;--border-hover:#cbd5e1;
+  --radius:10px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.07);
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:760px;margin:0 auto;padding:20px}
+
+/* HEADER */
+.header{text-align:center;padding:40px 0 10px}
+.header-badge{
+  display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.7rem;
+  color:var(--blue);letter-spacing:1.5px;text-transform:uppercase;
+  background:var(--blue-light);border:1px solid #dbeafe;
+  border-radius:100px;padding:5px 14px;margin-bottom:12px;
+}
+.header h1{font-size:1.6rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.header p{font-size:.9rem;color:var(--text-secondary)}
+
+/* SCREENS */
+.screen{display:none;animation:fadeUp .35s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* CHAPTER SELECT */
+.chapter-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:24px}
+.chapter-card{
+  background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 22px;cursor:pointer;transition:all .2s ease;
+}
+.chapter-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.chapter-card .card-label{
+  font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--text-dim);
+  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;
+}
+.chapter-card h3{font-size:1.05rem;font-weight:600;margin-bottom:4px}
+.chapter-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.5}
+.chapter-card .card-meta{
+  display:flex;gap:14px;margin-top:10px;font-size:.72rem;color:var(--text-dim);
+  font-family:'IBM Plex Mono',monospace;
+}
+.chapter-card.all-card{border:2px solid var(--blue);background:var(--blue-light)}
+.chapter-card.all-card:hover{background:#dbeafe}
+
+@media(min-width:600px){
+  .chapter-grid{grid-template-columns:1fr 1fr}
+  .chapter-card.all-card{grid-column:1/-1}
+}
+
+/* QUIZ HUD */
+.quiz-hud{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  padding:12px 16px;background:var(--bg-white);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:14px;
+  font-family:'IBM Plex Mono',monospace;font-size:.78rem;
+}
+.hud-item{display:flex;align-items:center;gap:6px}
+.hud-item .label{color:var(--text-dim);font-size:.65rem;letter-spacing:.5px;text-transform:uppercase}
+.hud-item .value{color:var(--text);font-weight:600}
+.hud-item.score .value{color:var(--green)}
+.hud-item.timer .value{color:var(--amber);min-width:28px;text-align:center}
+.hud-item.timer .value.danger{color:var(--red);animation:blink .5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.progress-track{width:100%;height:4px;background:var(--border);border-radius:100px;margin-bottom:16px;overflow:hidden}
+.progress-fill{height:100%;border-radius:100px;background:var(--blue);transition:width .3s ease}
+
+/* QUESTION */
+.question-card{
+  background:var(--bg-white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px;
+}
+.question-tag{
+  display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.62rem;
+  color:var(--blue);letter-spacing:1px;text-transform:uppercase;
+  background:var(--blue-light);border-radius:100px;padding:3px 10px;margin-bottom:14px;
+}
+.question-text{font-size:1.05rem;font-weight:600;line-height:1.6;margin-bottom:22px}
+
+.options-list{display:flex;flex-direction:column;gap:8px}
+.option-btn{
+  display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:13px 16px;cursor:pointer;transition:all .15s ease;
+  font-family:'DM Sans',sans-serif;font-size:.92rem;color:var(--text);line-height:1.5;
+}
+.option-btn:hover:not(.disabled){background:var(--bg-hover);border-color:var(--border-hover)}
+.option-btn .opt-letter{
+  flex-shrink:0;width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.75rem;
+  background:var(--bg-white);border:1px solid var(--border);
+}
+.option-btn.correct{background:var(--green-light)!important;border-color:var(--green-border)!important}
+.option-btn.correct .opt-letter{background:var(--green);border-color:var(--green);color:#fff}
+.option-btn.wrong{background:var(--red-light)!important;border-color:var(--red-border)!important}
+.option-btn.wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff}
+.option-btn.disabled{pointer-events:none;opacity:.55}
+.option-btn.correct.disabled,.option-btn.wrong.disabled{opacity:1}
+
+.explanation{
+  margin-top:16px;padding:14px 16px;border-radius:var(--radius-sm);
+  background:var(--blue-light);border-left:3px solid var(--blue);
+  font-size:.85rem;color:var(--text-secondary);line-height:1.6;
+  animation:fadeUp .25s ease;
+}
+.explanation strong{color:var(--blue-dark);font-weight:600}
+
+.nav-row{display:flex;justify-content:space-between;margin-top:16px;gap:10px}
+.btn{
+  font-family:'DM Sans',sans-serif;font-weight:600;font-size:.85rem;
+  padding:10px 22px;border-radius:var(--radius-sm);border:none;cursor:pointer;
+  transition:all .15s ease;display:inline-flex;align-items:center;gap:6px;
+}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-secondary{background:var(--bg-white);border:1px solid var(--border);color:var(--text-secondary)}
+.btn-secondary:hover{border-color:var(--border-hover);color:var(--text)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#b91c1c}
+.btn:disabled{opacity:.35;pointer-events:none}
+
+/* RESULTS */
+.results-hero{
+  text-align:center;padding:40px 20px;
+  background:var(--bg-white);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:16px;
+}
+.score-ring{width:140px;height:140px;margin:0 auto 20px;position:relative}
+.score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-ring circle{fill:none;stroke-width:6}
+.score-ring .track{stroke:var(--border)}
+.score-ring .fill{stroke:var(--blue);stroke-linecap:round;transition:stroke-dashoffset 1.2s ease}
+.score-ring .score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-ring .score-pct{font-size:2.2rem;font-weight:700;color:var(--text)}
+.score-ring .score-label{font-size:.68rem;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase}
+.results-hero h2{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.results-hero p{color:var(--text-secondary);font-size:.88rem}
+
+.results-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:16px 0}
+.stat-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.stat-card .stat-val{font-size:1.3rem;font-weight:700;margin-bottom:2px}
+.stat-card .stat-lbl{font-size:.65rem;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;letter-spacing:.5px;text-transform:uppercase}
+.stat-card.green .stat-val{color:var(--green)}
+.stat-card.red .stat-val{color:var(--red)}
+.stat-card.blue .stat-val{color:var(--blue)}
+.stat-card.purple .stat-val{color:#7c3aed}
+
+.chapter-breakdown{margin:16px 0}
+.chapter-breakdown h3{font-size:.68rem;font-family:'IBM Plex Mono',monospace;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.breakdown-row{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;
+}
+.breakdown-row .br-name{flex:1;font-weight:600;font-size:.85rem}
+.breakdown-row .br-bar{flex:2;height:6px;background:var(--border);border-radius:100px;overflow:hidden}
+.breakdown-row .br-bar-fill{height:100%;border-radius:100px;background:var(--blue);transition:width .8s ease}
+.breakdown-row .br-pct{font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--text);min-width:40px;text-align:right;font-weight:600}
+
+.wrong-answers-section{margin:16px 0}
+.wrong-answers-section h3{font-size:.68rem;font-family:'IBM Plex Mono',monospace;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.wrong-item{
+  background:var(--bg-white);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:16px;margin-bottom:8px;
+}
+.wrong-item .wi-q{font-weight:600;margin-bottom:8px;line-height:1.5;font-size:.92rem}
+.wrong-item .wi-your{color:var(--red);font-size:.82rem;margin-bottom:3px}
+.wrong-item .wi-correct{color:var(--green);font-size:.82rem;margin-bottom:6px}
+.wrong-item .wi-exp{font-size:.8rem;color:var(--text-secondary);line-height:1.5;padding-top:6px;border-top:1px solid var(--border)}
+
+.results-actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+
+.hidden{display:none!important}
+
+@media(max-width:600px){
+  .container{padding:14px}
+  .quiz-hud{padding:10px 12px;font-size:.72rem}
+  .question-card{padding:18px}
+  .question-text{font-size:.98rem}
+  .option-btn{padding:11px 13px;font-size:.86rem}
+  .btn{padding:9px 16px;font-size:.8rem}
+  .header h1{font-size:1.3rem}
+}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:100px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="header-badge">Exam Prep</div>
+  <h1>MTA 98-365 Quiz</h1>
+  <p>Windows Server Administration Fundamentals</p>
+</div>
+
+<!-- SCREEN: Chapter Select -->
+<div id="screen-select" class="screen active">
+  <div class="chapter-grid">
+    <div class="chapter-card" onclick="startQuiz(1)">
+      <div class="card-label">Module 01</div>
+      <h3>Server Overview</h3>
+      <p>Server hardware, processors, storage, BIOS, virtualization, Windows Server editions, installation methods</p>
+      <div class="card-meta"><span>30 Questions</span><span>~15 min</span></div>
+    </div>
+    <div class="chapter-card" onclick="startQuiz(2)">
+      <div class="card-label">Module 02</div>
+      <h3>Managing Windows Server</h3>
+      <p>Configuration, UAC, system settings, workgroups &amp; domains, remote desktop, device drivers, Device Manager</p>
+      <div class="card-meta"><span>25 Questions</span><span>~13 min</span></div>
+    </div>
+    <div class="chapter-card" onclick="startQuiz(5)">
+      <div class="card-label">Module 05</div>
+      <h3>Essential Services</h3>
+      <p>DNS, DHCP, WINS, Active Directory, FSMO roles, group policies, user accounts, security groups</p>
+      <div class="card-meta"><span>30 Questions</span><span>~15 min</span></div>
+    </div>
+    <div class="chapter-card all-card" onclick="startQuiz(0)">
+      <div class="card-label">Full Exam Simulation</div>
+      <h3>All Modules</h3>
+      <p>Mixed 85 questions from all modules for a comprehensive exam experience</p>
+      <div class="card-meta"><span>85 Questions</span><span>~43 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: Quiz -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-hud">
+    <div class="hud-item"><div><div class="label">Question</div><div class="value" id="hud-qnum">1/30</div></div></div>
+    <div class="hud-item score"><div><div class="label">Score</div><div class="value" id="hud-score">0</div></div></div>
+    <div class="hud-item timer"><div><div class="label">Time</div><div class="value" id="hud-timer">30</div></div></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-bar" style="width:0%"></div></div>
+  <div class="question-card">
+    <div class="question-tag" id="q-chapter-tag"></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options-list" id="q-options"></div>
+    <div class="explanation hidden" id="q-explanation"></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="quitQuiz()">Quit</button>
+    <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()" disabled>Next &rarr;</button>
+  </div>
+</div>
+
+<!-- SCREEN: Results -->
+<div id="screen-results" class="screen">
+  <div class="results-hero">
+    <div class="score-ring">
+      <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="54"/><circle class="fill" id="ring-fill" cx="60" cy="60" r="54" stroke-dasharray="339.292" stroke-dashoffset="339.292"/></svg>
+      <div class="score-text"><div class="score-pct" id="res-pct">0%</div><div class="score-label">Score</div></div>
+    </div>
+    <h2 id="res-title">Your Results</h2>
+    <p id="res-subtitle"></p>
+  </div>
+  <div class="results-stats">
+    <div class="stat-card green"><div class="stat-val" id="stat-correct">0</div><div class="stat-lbl">Correct</div></div>
+    <div class="stat-card red"><div class="stat-val" id="stat-wrong">0</div><div class="stat-lbl">Wrong</div></div>
+    <div class="stat-card blue"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-card purple"><div class="stat-val" id="stat-time">0s</div><div class="stat-lbl">Time</div></div>
+  </div>
+  <div class="chapter-breakdown" id="chapter-breakdown"></div>
+  <div class="wrong-answers-section" id="wrong-section"></div>
+  <div class="results-actions">
+    <button class="btn btn-secondary" onclick="showScreen('select')">Home</button>
+    <button class="btn btn-primary" onclick="retryQuiz()">Retry</button>
+    <button class="btn btn-danger" id="btn-review" onclick="toggleWrong()">Review Wrong Answers</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const allQuestions = [
+// ─── CHAPTER 1: Server Overview (30) ───
+{ch:1,q:"What is a server?",o:["A computer that provides services","A computer that requests services","A network device that routes traffic","A storage device"],a:0,e:"A server is a computer that provides services, while a client is a computer that requests services."},
+{ch:1,q:"A network made up of servers and clients is known as what?",o:["A client/server network","A peer-to-peer network","A star network","A hybrid network"],a:0,e:"A network made up of servers and clients is known as a client/server network."},
+{ch:1,q:"What does Windows Server use to define what services the server provides?",o:["Roles","Features","Services","Protocols"],a:0,e:"Windows Servers use 'roles' to define what services the server provides. A server can have multiple roles installed."},
+{ch:1,q:"Which of the following is NOT a server role?",o:[".NET Framework","File Services","Web Services","Directory Services"],a:0,e:".NET Framework is a server feature, not a role. File Services, Web Services, and Directory Services are server roles."},
+{ch:1,q:"What are the three key factors when selecting server hardware?",o:["Performance, Availability, Cost","Speed, Security, Size","Capacity, Power, Cooling","Processor, Memory, Storage"],a:0,e:"When choosing server hardware, keep in mind: Performance, Availability, and Cost."},
+{ch:1,q:"Which of the following is NOT one of the four primary subsystems?",o:["GPU","Processor","Memory","Network"],a:0,e:"The four primary subsystems are Processor, Memory, Storage, and Network. Failure in any of these can cause the entire system to fail."},
+{ch:1,q:"What is the maximum amount of RAM a 32-bit processor can address?",o:["4 GB","8 GB","16 GB","1 TB"],a:0,e:"A 32-bit processor can address a maximum of 4 Gigabytes of RAM, while a 64-bit processor can address up to 1 Terabyte."},
+{ch:1,q:"How much RAM can a 64-bit processor theoretically support?",o:["1 TB","4 GB","256 GB","512 GB"],a:0,e:"A 64-bit processor can theoretically address up to 1 Terabyte (TB) of RAM."},
+{ch:1,q:"What technique enables multiple threads to appear to run simultaneously on a single processor?",o:["Time slicing","Multicore processing","Hyperthreading","Virtual memory"],a:0,e:"Time slicing enables multiple threads and applications to appear to be running at the same time on a single processor."},
+{ch:1,q:"What is the primary function of RAM?",o:["Stores instructions and data that the processor accesses directly","Stores data permanently","Hosts the operating system files","Provides network connectivity"],a:0,e:"RAM is the computer's short-term or temporary memory. It stores instructions and data that the processor accesses directly."},
+{ch:1,q:"What is the key difference between SSD and HDD?",o:["SSD has no mechanical components","SSD has larger capacity","SSD uses magnetic fields","SSD is cheaper"],a:0,e:"Solid-state drives (SSD) are electronic devices with no mechanical components. HDDs are half electronic/half mechanical devices that store magnetic fields on rotating platters."},
+{ch:1,q:"What two technologies can servers use to connect to external storage?",o:["NAS and SAN","RAID and NAS","SSD and HDD","USB and SCSI"],a:0,e:"Servers may connect to external storage through a Network-Attached Storage (NAS) or Storage Area Network (SAN)."},
+{ch:1,q:"What is the typical network card speed for servers?",o:["1 Gbit/second or faster","100 Mbit/second","10 Mbit/second","10 Gbit/second"],a:0,e:"A typical speed for today's network cards is 100 Mbit/second for PCs, while servers typically use 1 Gbit/second or faster."},
+{ch:1,q:"What is the motherboard?",o:["The main printed circuit board that brings the four primary subsystems together","A component that only houses the processor","The power supply unit","The network controller"],a:0,e:"The motherboard is the main printed circuit board that brings the four primary subsystems together and provides electrical connections for communication."},
+{ch:1,q:"What does BIOS stand for and what does it do?",o:["Basic Input/Output System — controls most of the computer's I/O functions","Binary Integrated Operating System — boots the OS","Basic Internal Operating Software — manages drivers","Boot Initialization Output System — starts the boot process"],a:0,e:"BIOS (Basic Input/Output System) controls most of the computer's input/output functions and is stored in System ROM chips."},
+{ch:1,q:"What does 'flashing the BIOS' mean?",o:["Updating the system ROM BIOS","Deleting the BIOS","Resetting the BIOS password","Backing up the BIOS"],a:0,e:"Flashing the BIOS is the process of updating your system ROM BIOS."},
+{ch:1,q:"Which port type is NOT listed among standard server ports?",o:["DisplayPort","Ethernet","PS/2","SCSI"],a:0,e:"Standard ports include: Ethernet, Parallel, PS/2, Serial, VGA, USB, SCSI, HDMI, and Audio. DisplayPort is not in this list."},
+{ch:1,q:"What is the primary advantage of virtual server technology?",o:["Better hardware utilization since most hardware sits idle most of the time","Improved security","Lower cost","Faster network speeds"],a:0,e:"Virtualization offers a better way to utilize hardware since most hardware is sitting idle most of the time."},
+{ch:1,q:"Which statement about the server room is correct?",o:["It should be secure with limited access","It should be accessible to everyone","It only contains servers","It does not require cooling"],a:0,e:"The server room should be secure, with only a handful of people allowed access. It contains servers and communication devices including switches and routers."},
+{ch:1,q:"When was Windows NT first released?",o:["1993","1995","2000","1998"],a:0,e:"Windows NT was first released in 1993. Since then, Microsoft has built on each previous version."},
+{ch:1,q:"Which of the following is NOT a Windows Server 2008 R2 edition?",o:["Windows Server 2008 R2 Professional","Windows Server 2008 R2 Foundation","Windows Server 2008 R2 Enterprise","Windows Server 2008 R2 Datacenter"],a:0,e:"Windows Server 2008 R2 editions include Foundation, Standard, Enterprise, Datacenter, Web, and Itanium-Based Systems. There is no 'Professional' edition."},
+{ch:1,q:"Windows Server 2008 R2 is available in which architecture?",o:["64-bit only","32-bit only","Both 32-bit and 64-bit","Itanium only"],a:0,e:"Windows Server 2008 R2 is only available in a 64-bit version."},
+{ch:1,q:"What is the difference between server features and server roles?",o:["Features augment the functionality of roles; roles describe the server's function","They are the same thing","Roles are less important than features","Features are only used in Server Core"],a:0,e:"Server roles describe the function of the server, while server features are software programs that augment the functionality of one or more roles."},
+{ch:1,q:"What is true about Server Core installation?",o:["It has no Windows Explorer shell and only supports certain server roles","It supports all server roles","It has a full GUI interface","It supports third-party software"],a:0,e:"Server Core provides a minimal environment with no Windows Explorer shell that only supports certain server roles."},
+{ch:1,q:"Which statement about a clean installation is FALSE?",o:["It preserves existing settings and software","It installs the OS to a new directory","It is the preferred method","All files are installed fresh"],a:0,e:"A clean installation does NOT preserve existing settings. The disadvantage is that the system and all software need to be reinstalled, patched, and configured."},
+{ch:1,q:"What is the primary purpose of Sysprep?",o:["Remove system-specific data including the SID for cloning","Update the server","Clean up disk space","Install drivers"],a:0,e:"Sysprep (System Preparation Tool) removes system-specific data from Windows, resets the SID, and resets Windows Product Activation for cloning."},
+{ch:1,q:"What type of file is used for an unattended installation?",o:["An XML answer file","An INI configuration file","A batch script","A JSON configuration file"],a:0,e:"An answer file in XML format is used to perform an unattended installation of Windows."},
+{ch:1,q:"What did Windows Deployment Services (WDS) replace?",o:["Remote Installation Services (RIS)","Windows Update Services","System Center","Deployment Toolkit"],a:0,e:"WDS is the updated and redesigned version of Remote Installation Services (RIS) for network-based installation of Windows."},
+{ch:1,q:"What is a WIM (Windows Imaging Format) file?",o:["A file-based imaging format that Windows Server uses for rapid installation","A compression format","A virtual disk format","A backup file format"],a:0,e:"WIM is the file-based imaging format that Windows Server uses for rapid installation on new computers."},
+{ch:1,q:"What is the purpose of Microsoft product activation?",o:["To verify that software products are legitimately licensed (anti-piracy)","To update software","To improve performance","To establish network connectivity"],a:0,e:"Microsoft product activation is an anti-piracy technology designed to verify that software products are legitimately licensed. A product key is required."},
+
+// ─── CHAPTER 2: Managing Windows Server (25) ───
+{ch:2,q:"When does the Initial Configuration Tasks utility automatically launch?",o:["When you first log on to Windows after installation","Every time you log on","When the server restarts","Only when manually started"],a:0,e:"Initial Configuration Tasks utility automatically launches when you first log on to Windows after installation."},
+{ch:2,q:"Which of the following is NOT a Control Panel category?",o:["Firewall","System and Security","Network and Internet","Hardware"],a:0,e:"Control Panel categories include: System and Security, Network and Internet, Hardware, Programs, User Accounts, Appearance, Clock/Language/Region, and Ease of Access."},
+{ch:2,q:"When does UAC ask for an administrator password?",o:["When logged in as a standard user","When logged in as an administrator","Always","Never"],a:0,e:"When logged in as an administrator, UAC asks for permission. When logged in as a standard user, UAC asks for an administrator password."},
+{ch:2,q:"What is the primary purpose of User Account Control (UAC)?",o:["To help prevent unauthorized changes to your computer","To detect viruses","To filter network traffic","To encrypt files"],a:0,e:"UAC is a security component that helps prevent unauthorized changes to your computer."},
+{ch:2,q:"Which of the following is NOT a system setting you can configure?",o:["Install antivirus software","Change the computer name","Add the computer to a domain","Access the Device Manager"],a:0,e:"System settings include: computer name, domain, Device Manager, remote settings, startup/recovery, and performance settings."},
+{ch:2,q:"What is the key difference between a workgroup and a domain?",o:["Workgroup is decentralized; domain provides centralized security","They are the same","Workgroup is more secure","Domain is only for small networks"],a:0,e:"A workgroup is peer-to-peer with decentralized accounts. A domain is a logical unit associated with AD DS that provides centralized security."},
+{ch:2,q:"What port does Remote Desktop Protocol (RDP) use?",o:["3389","3306","443","80"],a:0,e:"Remote Desktop connections use RDP protocol on port 3389 by default."},
+{ch:2,q:"What four pieces of information are needed for IP configuration?",o:["IP address, subnet mask, default gateway, DNS server","IP address, MAC address, DNS, WINS","IP address, subnet mask, DHCP, NAT","IP address, port number, DNS, gateway"],a:0,e:"IP configuration requires: IP address and subnet mask (unique identity), default gateway (router), and DNS server (name resolution)."},
+{ch:2,q:"IP address settings can be configured manually or automatically via which protocol?",o:["DHCP","DNS","FTP","SNMP"],a:0,e:"The IP address, subnet mask, default gateway, and DNS servers can be configured manually or automatically via a DHCP server."},
+{ch:2,q:"What is a device driver?",o:["A component that enables Windows to interact with a hardware device","A physical connector for devices","A power management tool","A network utility"],a:0,e:"A device driver is a component that enables Windows to interact with a hardware device."},
+{ch:2,q:"Which of the following is NOT a type of hardware resource?",o:["MAC address","IRQ (Interrupt Request)","DMA channels","I/O port addresses"],a:0,e:"Hardware resources include: IRQ, DMA channels, I/O port addresses, and memory address ranges. A MAC address is not a hardware resource type."},
+{ch:2,q:"What is an IRQ (Interrupt Request)?",o:["A signal used to access and communicate with a hardware device","A memory allocation method","A disk read/write operation","A network routing protocol"],a:0,e:"IRQ (Interrupt Request) is used to access and communicate with a hardware device."},
+{ch:2,q:"What does DMA (Direct Memory Access) enable?",o:["Certain components to access system memory without using the CPU","Faster disk access","Network connectivity","Improved processor performance"],a:0,e:"DMA enables certain components within a device to access system memory without using the Central Processing Unit (CPU)."},
+{ch:2,q:"What does Plug and Play (PnP) technology do?",o:["Automatically detects hardware and installs the appropriate driver","Automatically updates software","Automatically sets up network connections","Automatically applies security patches"],a:0,e:"Plug and Play (PnP) enables the Windows operating system to detect and configure hardware and install the appropriate driver."},
+{ch:2,q:"What is required for all drivers running on 64-bit Windows?",o:["They must be signed","They must be encrypted","They must be written by Microsoft","They must be open source"],a:0,e:"All drivers running on a 64-bit version of Windows must be signed before Windows will load them."},
+{ch:2,q:"What does a signed driver include?",o:["A digital signature indicating the publisher and whether the driver has been altered","An encryption key","A license number","Source code"],a:0,e:"A signed driver includes a digital signature that can indicate the publisher and show if a driver has been altered."},
+{ch:2,q:"In Device Manager, what does a black down arrow indicate?",o:["The device is disabled","The device is working properly","The driver needs updating","The device is not found"],a:0,e:"A down black arrow indicates a disabled device — it is physically present and consuming resources, but does not have a driver loaded."},
+{ch:2,q:"In Device Manager, what does a black exclamation point (!) on a yellow field indicate?",o:["The device is in a problem state","The device is disabled","The driver is up to date","The device is working properly"],a:0,e:"A black exclamation point (!) on a yellow field indicates the device is in a problem state."},
+{ch:2,q:"What does it mean when devices are listed under 'Other devices' in Device Manager?",o:["The proper driver is not loaded","The device is in a problem state","The device is disabled","The device has been removed"],a:0,e:"Devices listed under 'Other devices' or with a generic name like 'Ethernet Controller' indicate that the proper driver is not loaded."},
+{ch:2,q:"How can Server Core be managed?",o:["Locally at a command prompt, Remote Desktop, or remotely via MMC","Only through a GUI","Only through PowerShell","Only locally"],a:0,e:"Server Core can be managed locally at a command prompt, remotely using Remote Desktop Services, or remotely using MMC-based administrative tools."},
+{ch:2,q:"UAC was first introduced with which version of Windows?",o:["Windows Vista","Windows XP","Windows 7","Windows Server 2003"],a:0,e:"User Account Control (UAC) is a feature that started with Windows Vista and is included with Windows Server 2008 and later."},
+{ch:2,q:"A domain is associated with which service?",o:["Active Directory Domain Services (AD DS)","DHCP","DNS","WINS"],a:0,e:"A domain is a logical unit of computers that defines a security boundary, and it is associated with Active Directory Domain Services (AD DS)."},
+{ch:2,q:"What is the driver store?",o:["An extensive built-in library of device drivers in Windows","An online store for purchasing drivers","A folder for driver backups","A third-party driver repository"],a:0,e:"Windows Server includes a driver store with an extensive library of device drivers to prevent constantly inserting the installation DVD."},
+{ch:2,q:"What is the correct order of steps for configuring a server?",o:["Install OS, configure services, install additional software","Install additional software, install OS, configure services","Configure services, install OS, install additional software","All steps are done simultaneously"],a:0,e:"The correct order is: select/install/configure the operating system, then configure services, then install additional software."},
+{ch:2,q:"What do Remote Assistance and Remote Desktop have in common?",o:["They both allow access to a remote computer over the network","They only work on the same network","They are only for servers","They cannot transfer files"],a:0,e:"Both allow you to access a computer running Windows with another computer connected over the network or Internet, as if sitting in front of the remote computer."},
+
+// ─── CHAPTER 5: Essential Services (30) ───
+{ch:5,q:"Why is name resolution needed?",o:["Because logical addresses are hard to remember, so names need to be translated to addresses","To improve security","To increase network speed","For data compression"],a:0,e:"Logical addresses (especially IPv6) are hard to remember, so a naming service is needed to translate logical names into logical addresses."},
+{ch:5,q:"What does DNS stand for?",o:["Domain Name System","Dynamic Network Service","Distributed Name Server","Data Network System"],a:0,e:"DNS stands for Domain Name System."},
+{ch:5,q:"How is DNS structured?",o:["A hierarchical client/server-based distributed database","A flat centralized database","A peer-to-peer distributed system","A star topology network"],a:0,e:"DNS is a hierarchical client/server-based distributed database management system that translates domain/host names to IP addresses."},
+{ch:5,q:"What is at the top of the DNS hierarchy?",o:["The root domain","The .com domain","The master server","The ISP"],a:0,e:"The top of the DNS tree is known as the root domain. Below it are top-level domains such as .com, .edu, .org, and .net."},
+{ch:5,q:"What record types does a forward lookup zone primarily contain?",o:["A and CNAME records","PTR records","MX records","SOA records"],a:0,e:"The forward lookup zone has the majority of resource records, including A and CNAME records, while the reverse lookup zone has PTR records."},
+{ch:5,q:"What record type does a reverse lookup zone contain?",o:["PTR records","A records","CNAME records","MX records"],a:0,e:"The reverse lookup zone contains PTR (Pointer) records for resolving IP addresses to domain names."},
+{ch:5,q:"What does DNS Round Robin do?",o:["Distributes loads by rotating resource records with the same name pointing to different IPs","Improves DNS security","Clears DNS cache","Backs up DNS records"],a:0,e:"DNS Round Robin rotates the order of resource records with the same name that point to different IP addresses to distribute loads."},
+{ch:5,q:"DNS queries and zone transfers occur over which port?",o:["TCP/UDP port 53","TCP port 80","UDP port 67","TCP port 443"],a:0,e:"DNS queries and DNS transfers between primary and secondary zones occur over TCP/UDP port 53."},
+{ch:5,q:"What does WINS (Windows Internet Name Service) do?",o:["Translates NetBIOS names to IP addresses","Translates domain names to IP addresses","Automatically assigns IP addresses","Provides file sharing"],a:0,e:"WINS is a legacy naming service that translates from NetBIOS (computer name) to IP addresses."},
+{ch:5,q:"What is the main disadvantage of WINS compared to DNS?",o:["It is not hierarchical and only works for Windows operating systems","It is slower","It is more expensive","It is less secure"],a:0,e:"WINS is not a hierarchical system like DNS, it is only good for your organization, and it functions only for Windows operating systems."},
+{ch:5,q:"What does DHCP stand for and what does it do?",o:["Dynamic Host Configuration Protocol — automatically assigns IP addresses","Domain Host Control Protocol — manages domain names","Distributed Hardware Configuration Program — configures hardware","Direct Host Communication Protocol — provides communication"],a:0,e:"DHCP (Dynamic Host Configuration Protocol) automatically assigns IP addresses and related parameters so a host can immediately communicate on an IP network."},
+{ch:5,q:"A DHCP client sends messages to which UDP port?",o:["UDP port 67","UDP port 68","UDP port 53","UDP port 80"],a:0,e:"The DHCP client sends messages to UDP port 67, and the server sends messages to UDP port 68."},
+{ch:5,q:"A DHCP server sends messages to which UDP port?",o:["UDP port 68","UDP port 67","UDP port 53","UDP port 443"],a:0,e:"The DHCP server sends messages to the client on UDP port 68."},
+{ch:5,q:"What does a directory service do?",o:["Stores, organizes, and provides access to information about network resources","Encrypts files","Routes network traffic","Manages operating system updates"],a:0,e:"A directory service stores, organizes, and provides access to information about common items and network resources such as users, groups, printers, and files."},
+{ch:5,q:"Which protocols does Active Directory use?",o:["LDAP and Kerberos","HTTP and FTP","SMTP and POP3","SSH and Telnet"],a:0,e:"Active Directory provides LDAP, Kerberos-based and single sign-on authentication, and DNS-based naming services."},
+{ch:5,q:"What service is required for Active Directory to function?",o:["DNS","DHCP","WINS","FTP"],a:0,e:"Active Directory requires DNS to function."},
+{ch:5,q:"What is the correct hierarchy of Active Directory's logical structure?",o:["Forest > Tree > Domain","Domain > Tree > Forest","Tree > Forest > Domain","Site > Domain > Forest"],a:0,e:"The Active Directory logical structure hierarchy is: Forest (top) > Tree > Domain."},
+{ch:5,q:"What does Active Directory use to allow users in one domain to access resources in another domain?",o:["Trust relationships","VPN","Proxy","Firewall rules"],a:0,e:"Active Directory uses trust relationships to allow users in one domain to access resources in another domain."},
+{ch:5,q:"What is a 'site' in Active Directory?",o:["One or more IP subnets connected by a high-speed link","A web site","A server room","A software component"],a:0,e:"A site is one or more IP subnets connected by a high-speed link, typically defined by a geographical location."},
+{ch:5,q:"What does a domain controller do?",o:["Stores a replica of the account and security information for the domain","Only shares files","Provides DNS services","Provides DHCP services"],a:0,e:"A domain controller is a Windows server that stores a replica of the account and security information for the domain and defines the domain boundaries."},
+{ch:5,q:"What is a server that is NOT a domain controller called?",o:["A member server","A backup server","A primary server","A standalone server"],a:0,e:"A server that is not running as a domain controller is known as a member server."},
+{ch:5,q:"What tool is used to demote a domain controller to a member server?",o:["dcpromo","sysprep","netdom","ntdsutil"],a:0,e:"To demote a domain controller to a member server, you would rerun the dcpromo program."},
+{ch:5,q:"What does a global catalog do?",o:["Replicates the information of every object in a tree and forest","Only stores user information","Manages DNS records","Applies group policies"],a:0,e:"A global catalog replicates the information of every object in a tree and forest. By default, it is created automatically on the first domain controller."},
+{ch:5,q:"Why are FSMO roles needed?",o:["Because certain functions can only be handled by one domain controller at a time","To make all DCs equal","For backup purposes","To improve performance"],a:0,e:"Active Directory uses multimaster replication, but certain functions can be handled by only one DC at a time, so it uses FSMO (Flexible Single Master Operations) roles."},
+{ch:5,q:"What does the functional level of a domain or forest depend on?",o:["The Windows Server OS versions running on the domain controllers","The server hardware","The network speed","The number of users"],a:0,e:"The functional level depends on which Windows Server operating system versions are running on the domain controllers and controls which advanced features are available."},
+{ch:5,q:"What is the 128-bit unique number assigned to Active Directory objects?",o:["GUID (Globally Unique Identifier)","MAC address","IP address","SID only"],a:0,e:"Active Directory objects are assigned a 128-bit unique number called a GUID (Globally Unique Identifier), sometimes referred to as a security identifier (SID)."},
+{ch:5,q:"How many types of user accounts exist on Windows networks?",o:["Two: Local user accounts and Domain user accounts","One: Domain accounts only","Three: Local, Domain, and Guest","Four: Local, Domain, Administrator, and Guest"],a:0,e:"On Windows networks there are two types of user accounts: Local user accounts and Domain user accounts."},
+{ch:5,q:"What does an Access Control List (ACL) do?",o:["Lists all users and groups that have access to an object","Filters network traffic","Manages DNS records","Encrypts files"],a:0,e:"An ACL lists all users and groups that have access to an object and records what actions those users are authorized to perform."},
+{ch:5,q:"How many types of groups exist in Active Directory?",o:["Two: Security and Distribution","One: Security only","Three: Security, Distribution, Universal","Four: Local, Global, Universal, Distribution"],a:0,e:"In Windows Active Directory, there are two types of groups: Security and Distribution."},
+{ch:5,q:"What does the AGDLP acronym stand for?",o:["Accounts > Global > Domain Local > Permissions","Active > Group > Domain > Local Policy","Admin > Global > Domain > Protocol","Accounts > Gateway > Domain > Permissions"],a:0,e:"AGDLP stands for Accounts > Global > Domain Local > Permissions, the recommended method for assigning access using global and domain local groups."},
+{ch:5,q:"When universal groups are used, what does the acronym become?",o:["AGUDLP","AGDULP","AUGDLP","AGDLUP"],a:0,e:"When using universal groups, the mnemonic expands to AGUDLP: Accounts > Global > Universal > Domain Local > Permissions."},
+{ch:5,q:"Which of the following is NOT a built-in group?",o:["Power Users","Domain Admins","Backup Operators","Authenticated Users"],a:0,e:"Built-in groups include: Domain Admins, Domain Users, Account Operators, Backup Operators, Authenticated Users, and Everyone. 'Power Users' is not listed."},
+{ch:5,q:"Which of the following is NOT an Active Directory management tool?",o:["Active Directory Migration Tool","Active Directory Users and Computers","Active Directory Domains and Trusts","Active Directory Sites and Services"],a:0,e:"AD management tools include: AD Users and Computers, AD Domains and Trusts, AD Sites and Services, AD Administrative Center, and GPMC."},
+{ch:5,q:"What does Group Policy provide?",o:["Centralized management and configuration of operating systems, applications, and user settings","Only security settings","Only software deployment","Only network configuration"],a:0,e:"Group Policy provides centralized management and configuration of operating systems, applications, and user settings in an Active Directory environment."},
+{ch:5,q:"In what order are Group Policies applied?",o:["Local > Site > Domain > OU","OU > Domain > Site > Local","Domain > Site > Local > OU","Site > Local > OU > Domain"],a:0,e:"Group Policies are applied in this order: Local > Site > Domain > OU."},
+{ch:5,q:"What does delegation of control allow?",o:["Assigning a range of administrative tasks to appropriate users and groups","Managing server roles","Updating DNS records","Applying group policies"],a:0,e:"By delegating administration, you can assign a range of administrative tasks to the appropriate users and groups."},
+];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━
+//  QUIZ ENGINE
+// ━━━━━━━━━━━━━━━━━━━━━━━
+let currentQuiz=[],currentIndex=0,score=0,answered=false,timerInterval=null,timeLeft=30,wrongAnswers=[],selectedChapter=0,quizStartTime=0;
+const chapterNames={1:'Module 1: Server Overview',2:'Module 2: Managing Windows Server',5:'Module 5: Essential Services'};
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function shuffle(arr){
+  const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;
+}
+function startQuiz(chapter){
+  selectedChapter=chapter;
+  let pool=chapter===0?[...allQuestions]:allQuestions.filter(q=>q.ch===chapter);
+  currentQuiz=shuffle(pool).map(q=>{
+    const correctText=q.o[q.a];const shuffled=shuffle([...q.o]);
+    return{...q,o:shuffled,a:shuffled.indexOf(correctText)};
+  });
+  currentIndex=0;score=0;wrongAnswers=[];quizStartTime=Date.now();
+  showScreen('quiz');renderQuestion();
+}
+function renderQuestion(){
+  answered=false;const q=currentQuiz[currentIndex],total=currentQuiz.length;
+  document.getElementById('hud-qnum').textContent=`${currentIndex+1}/${total}`;
+  document.getElementById('hud-score').textContent=score;
+  document.getElementById('progress-bar').style.width=`${(currentIndex/total)*100}%`;
+  document.getElementById('q-chapter-tag').textContent=chapterNames[q.ch]||`Module ${q.ch}`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-explanation').classList.add('hidden');
+  document.getElementById('btn-next').disabled=true;
+  const letters=['A','B','C','D'];
+  document.getElementById('q-options').innerHTML=q.o.map((opt,i)=>`
+    <button class="option-btn" onclick="selectAnswer(${i})" data-idx="${i}">
+      <span class="opt-letter">${letters[i]}</span><span>${opt}</span>
+    </button>`).join('');
+  startTimer();
+}
+function selectAnswer(idx){
+  if(answered)return;answered=true;clearInterval(timerInterval);
+  const q=currentQuiz[currentIndex],buttons=document.querySelectorAll('.option-btn');
+  buttons.forEach(btn=>{
+    btn.classList.add('disabled');const bIdx=parseInt(btn.dataset.idx);
+    if(bIdx===q.a)btn.classList.add('correct');
+    if(bIdx===idx&&idx!==q.a)btn.classList.add('wrong');
+  });
+  if(idx===q.a){score++;document.getElementById('hud-score').textContent=score;}
+  else{
+    wrongAnswers.push({...q,userAnswer:idx});
+    const expEl=document.getElementById('q-explanation');
+    expEl.innerHTML=`<strong>Correct Answer:</strong> ${q.o[q.a]}<br><br>${q.e}`;
+    expEl.classList.remove('hidden');
+  }
+  document.getElementById('btn-next').disabled=false;
+  if(idx===q.a)setTimeout(()=>{if(answered&&currentIndex<currentQuiz.length-1)nextQuestion();},1200);
+}
+function nextQuestion(){
+  if(currentIndex<currentQuiz.length-1){currentIndex++;renderQuestion();}
+  else showResults();
+}
+function startTimer(){
+  timeLeft=30;const timerEl=document.getElementById('hud-timer');
+  timerEl.textContent=timeLeft;timerEl.classList.remove('danger');
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    timeLeft--;timerEl.textContent=timeLeft;
+    if(timeLeft<=5)timerEl.classList.add('danger');
+    if(timeLeft<=0){clearInterval(timerInterval);if(!answered)selectAnswer(-1);}
+  },1000);
+}
+function showResults(){
+  clearInterval(timerInterval);
+  const totalTime=Math.round((Date.now()-quizStartTime)/1000),total=currentQuiz.length,pct=Math.round((score/total)*100);
+  showScreen('results');
+  const circumference=2*Math.PI*54,offset=circumference-(pct/100)*circumference;
+  setTimeout(()=>{document.getElementById('ring-fill').style.strokeDashoffset=offset;},100);
+  document.getElementById('res-pct').textContent=pct+'%';
+  let title,subtitle;
+  if(pct>=90){title='Excellent!';subtitle='You are ready for the exam!';}
+  else if(pct>=70){title='Good Job!';subtitle='A little more study and you will be perfect.';}
+  else if(pct>=50){title='Average';subtitle='Focus on your weak areas.';}
+  else{title='More Study Needed';subtitle='Review the topics again.';}
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-subtitle').textContent=subtitle;
+  document.getElementById('stat-correct').textContent=score;
+  document.getElementById('stat-wrong').textContent=total-score;
+  document.getElementById('stat-total').textContent=total;
+  const mins=Math.floor(totalTime/60),secs=totalTime%60;
+  document.getElementById('stat-time').textContent=mins>0?`${mins}m ${secs}s`:`${secs}s`;
+  const chapters=[...new Set(currentQuiz.map(q=>q.ch))].sort();
+  let bh='<h3>Results by Chapter</h3>';
+  chapters.forEach(ch=>{
+    const chQ=currentQuiz.filter(q=>q.ch===ch),chCorrect=chQ.length-wrongAnswers.filter(w=>w.ch===ch).length,chPct=Math.round((chCorrect/chQ.length)*100);
+    bh+=`<div class="breakdown-row"><span class="br-name">${chapterNames[ch]}</span><div class="br-bar"><div class="br-bar-fill" style="width:${chPct}%"></div></div><span class="br-pct">${chPct}%</span></div>`;
+  });
+  document.getElementById('chapter-breakdown').innerHTML=bh;
+  let wh='';
+  if(wrongAnswers.length>0){
+    wh='<h3>Wrong Answers</h3>';
+    wrongAnswers.forEach((w,i)=>{
+      const yours=w.userAnswer>=0?w.o[w.userAnswer]:'Time expired — no answer given';
+      wh+=`<div class="wrong-item"><div class="wi-q">${i+1}. ${w.q}</div><div class="wi-your">✕ Your answer: ${yours}</div><div class="wi-correct">✓ Correct answer: ${w.o[w.a]}</div><div class="wi-exp">${w.e}</div></div>`;
+    });
+  }
+  const ws=document.getElementById('wrong-section');ws.innerHTML=wh;ws.classList.add('hidden');
+  document.getElementById('btn-review').style.display=wrongAnswers.length>0?'':'none';
+}
+function toggleWrong(){
+  const s=document.getElementById('wrong-section'),b=document.getElementById('btn-review');
+  if(s.classList.contains('hidden')){s.classList.remove('hidden');b.textContent='Hide Wrong Answers';}
+  else{s.classList.add('hidden');b.textContent='Review Wrong Answers';}
+}
+function quitQuiz(){clearInterval(timerInterval);showScreen('select');}
+function retryQuiz(){startQuiz(selectedChapter);}
+</script>
+</body>
+</html>

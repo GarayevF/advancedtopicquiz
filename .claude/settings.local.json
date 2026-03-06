@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(where:*)",
+      "Bash(\"/c/Users/VECTOR/AppData/Local/Programs/Python/Python312/python.exe\":*)"
+    ]
+  }
+}
