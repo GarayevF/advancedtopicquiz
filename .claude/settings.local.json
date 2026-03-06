@@ -14,7 +14,27 @@
       "Bash(source /tmp/pdfenv/bin/activate && python3 << 'PYEOF'\nimport fitz\n\npdf_path = \"/Users/faridgarayev/Desktop/advancedtopicquiz/Identity with WindowsServer.pdf\"\ndoc = fitz.open\\(pdf_path\\)\n\nfor page_num in range\\(100, 200\\):\n    page = doc[page_num]\n    text = page.get_text\\(\\).strip\\(\\)\n    if text:\n        print\\(f\"\\\\n--- PAGE {page_num + 1} ---\"\\)\n        print\\(text\\)\n\ndoc.close\\(\\)\nPYEOF)",
       "Bash(source /tmp/pdfenv/bin/activate && python3 << 'PYEOF'\nimport fitz\n\npdf_path = \"/Users/faridgarayev/Desktop/advancedtopicquiz/Identity with WindowsServer.pdf\"\ndoc = fitz.open\\(pdf_path\\)\n\nfor page_num in range\\(200, 300\\):\n    page = doc[page_num]\n    text = page.get_text\\(\\).strip\\(\\)\n    if text:\n        print\\(f\"\\\\n--- PAGE {page_num + 1} ---\"\\)\n        print\\(text\\)\n\ndoc.close\\(\\)\nPYEOF)",
       "Bash(source /tmp/pdfenv/bin/activate && python3 << 'PYEOF'\nimport fitz\n\npdf_path = \"/Users/faridgarayev/Desktop/advancedtopicquiz/Identity with WindowsServer.pdf\"\ndoc = fitz.open\\(pdf_path\\)\n\nfor page_num in range\\(300, 400\\):\n    page = doc[page_num]\n    text = page.get_text\\(\\).strip\\(\\)\n    if text:\n        print\\(f\"\\\\n--- PAGE {page_num + 1} ---\"\\)\n        print\\(text\\)\n\ndoc.close\\(\\)\nPYEOF)",
-      "Bash(source /tmp/pdfenv/bin/activate && python3 << 'PYEOF'\nimport fitz\n\npdf_path = \"/Users/faridgarayev/Desktop/advancedtopicquiz/Identity with WindowsServer.pdf\"\ndoc = fitz.open\\(pdf_path\\)\n\nfor page_num in range\\(400, 497\\):\n    page = doc[page_num]\n    text = page.get_text\\(\\).strip\\(\\)\n    if text:\n        print\\(f\"\\\\n--- PAGE {page_num + 1} ---\"\\)\n        print\\(text\\)\n\ndoc.close\\(\\)\nPYEOF)"
+      "Bash(source /tmp/pdfenv/bin/activate && python3 << 'PYEOF'\nimport fitz\n\npdf_path = \"/Users/faridgarayev/Desktop/advancedtopicquiz/Identity with WindowsServer.pdf\"\ndoc = fitz.open\\(pdf_path\\)\n\nfor page_num in range\\(400, 497\\):\n    page = doc[page_num]\n    text = page.get_text\\(\\).strip\\(\\)\n    if text:\n        print\\(f\"\\\\n--- PAGE {page_num + 1} ---\"\\)\n        print\\(text\\)\n\ndoc.close\\(\\)\nPYEOF)",
+      "Bash(ls:*)",
+      "Bash(pip install:*)",
+      "Bash(/Library/Frameworks/Python.framework/Versions/3.10/bin/python3:*)",
+      "WebSearch",
+      "WebFetch(domain:quizlet.com)",
+      "Bash(head:*)",
+      "WebFetch(domain:webcache.googleusercontent.com)",
+      "WebFetch(domain:www.itexams.com)",
+      "WebFetch(domain:www.certlibrary.com)",
+      "WebFetch(domain:officialdumps.com)",
+      "WebFetch(domain:www.examtopics.com)",
+      "WebFetch(domain:www.edusum.com)",
+      "WebFetch(domain:www.docsity.com)",
+      "WebFetch(domain:www.examshared.com)",
+      "WebFetch(domain:www.i-tec.org)",
+      "WebFetch(domain:www.slideserve.com)",
+      "WebFetch(domain:web.archive.org)",
+      "WebFetch(domain:www.youracclaim.com)",
+      "WebFetch(domain:wayground.com)",
+      "Bash(grep:*)"
     ]
   }
 }
